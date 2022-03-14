@@ -1,45 +1,64 @@
 const fs = require("fs");
-const mysql = require("mysql");
 const mybatisMapper = require("mybatis-mapper");
-const config = require("../../config/default.json");
-const MybatisMapper = require("mybatis-mapper");
+const mysql = require("mysql");
 // const winston = require("winston");
-
-const connection = mysql.createConnection(mysql.createPool(config));
 
 class mysqlManager {
   // logger = winston.Logger;
 
   async init(queryPathList) {
-    mybatisMapper.createMapper(fs.readdirSync(queryPathList));
+    const connection = mysql.createConnection({
+      host: "127.0.0.1",
+      user: "simplatform",
+      database: "iot_cloud",
+      password: "Simplatform!@3",
+    });
+
+    if (queryPathList != "") {
+      let files = fs.readdirSync(queryPathList);
+
+      const results = [];
+
+      files.map(file => {
+        results.push(`${queryPathList}/${file}`);
+      });
+
+      mybatisMapper.createMapper(results);
+    }
+
+    return connection;
   }
 
-  async querySingle(queryList) {
-    const format = { language: "sql", indent: "" };
+  async querySingle(queryList, queryPathList) {
+    try {
+      const connection = await this.init(queryPathList);
 
-    const query = MybatisMapper.getStatement(
-      queryList.namespace,
-      queryList.sqlId,
-      queryList.param,
-      format
-    );
+      const format = { language: "sql", indent: "  " };
+      const query = mybatisMapper.getStatement(
+        queryList.namespace,
+        queryList.sqlId,
+        queryList.param,
+        format
+      );
 
-    connection.connect();
+      connection.connect();
 
-    // this.logger.debug("====================================================");
-    // this.logger.debug(`= sql [${queryList.namespace}/${queryList.sqlId}]`);
-    // this.logger.debug(`${query}`);
-    // this.logger.debug("====================================================");
+      // console.log("====================================================");
+      // console.log(`= sql [${queryList.namespace}/${queryList.sqlId}]`);
+      // console.log(`${query}`);
+      // console.log("====================================================");
 
-    connection.query(query, function (error, results, fields) {
-      if (error) {
-        this.logger.debug(error);
-      }
-      this.logger.debug(results);
-    });
-    connection.end();
+      const results = connection.query(
+        query,
+        function (error, results, fields) {
+          if (error) throw error;
+        }
+      );
 
-    return results;
+      return results;
+    } catch (err) {
+      throw err.message;
+    }
   }
 }
 
