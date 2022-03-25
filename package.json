@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/goodaegwang/cloud_server#readme",
   "dependencies": {
+    "ejs": "^3.1.6",
     "express": "^4.17.3",
     "mybatis-mapper": "^0.6.6",
     "mysql": "^2.18.1",
