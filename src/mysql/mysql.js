@@ -1,6 +1,7 @@
 const fs = require("fs");
 const mybatisMapper = require("mybatis-mapper");
 const mysql = require("mysql");
+const { res } = require("express");
 // const winston = require("winston");
 
 class mysqlManager {
@@ -30,35 +31,32 @@ class mysqlManager {
   }
 
   async querySingle(queryList, queryPathList) {
-    try {
-      const connection = await this.init(queryPathList);
+    const connection = await this.init(queryPathList);
 
-      const format = { language: "sql", indent: "  " };
-      const query = mybatisMapper.getStatement(
-        queryList.namespace,
-        queryList.sqlId,
-        queryList.param,
-        format
-      );
+    const format = { language: "sql", indent: "  " };
 
-      connection.connect();
+    const query = mybatisMapper.getStatement(
+      queryList.namespace,
+      queryList.sqlId,
+      queryList.param,
+      format
+    );
 
-      // console.log("====================================================");
-      // console.log(`= sql [${queryList.namespace}/${queryList.sqlId}]`);
-      // console.log(`${query}`);
-      // console.log("====================================================");
+    connection.connect();
 
-      const results = connection.query(
-        query,
-        function (error, results, fields) {
-          if (error) throw error;
-        }
-      );
+    console.log("====================================================");
+    console.log(`= sql [${queryList.namespace}/${queryList.sqlId}]`);
+    console.log(`${query}`);
+    console.log("====================================================");
+
+    const result = connection.query(query, function (err, results) {
+      if (err) throw error;
+      console.log("User info is: ", results);
 
       return results;
-    } catch (err) {
-      throw err.message;
-    }
+    });
+
+    return result;
   }
 }
 

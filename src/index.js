@@ -1,24 +1,17 @@
 const express = require("express");
 const app = express();
 const port = 1004;
-const mysqlManager = require("./mysql/mysql");
-const path = require("path");
-const queryPathList = path.join(__dirname, "mybatis");
+const indexService = require("./index.service");
 
-app.get("/", async (req, res) => {
-  try {
-    const query = {
-      namespace: "devices",
-      sqlId: "getDevicesAll",
-      param: {},
-    };
+app.set("view engine", "ejs");
+app.use(express.static(__dirname + "/src/views"));
 
-    const results = await mysqlManager.querySingle(query, queryPathList);
+app.get("/", async function (req, res) {
+  const devices = await indexService.getDevices();
 
-    console.log(results);
-  } catch (err) {
-    throw err.message;
-  }
+  res.render("index", {
+    devices,
+  });
 });
 
 app.listen(port, () => {

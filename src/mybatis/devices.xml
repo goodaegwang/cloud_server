@@ -3,7 +3,9 @@
 <mapper namespace="devices">  
   <select id="getDevicesAll">
     SELECT
-      *
+      HEX(id) as id,
+      name,
+      identifier
     FROM
       devices
   </select>

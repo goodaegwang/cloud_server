@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title> 구대광의 개발 페이지</title>
+</head>
+
+<body>
+    <% for (let i=0; i < devices.length; i++) { %>
+    <li id="<%= devices[i].id %>">디바이스 이름: <%= devices[i].name %>, 디바이스 식별키: <%= devices[i].identifier %> </li>
+    <% } %>
+</body>
+
+</html>
