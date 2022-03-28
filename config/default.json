@@ -3,5 +3,14 @@
   "user": "simplatform",
   "password": "Simplatform!@3",
   "database": "iot_cloud",
-  "connectionLimit": 30
+  "connectionLimit": 30,
+  "mysql": {
+    "connectionLimit": 10,
+    "host": "127.0.0.1",
+    "port": 3306,
+    "user": "simplatform",
+    "password": "Simplatform!@3",
+    "database": "iot_cloud",
+    "multipleStatements": true
+  }
 }

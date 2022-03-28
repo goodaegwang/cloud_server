@@ -1,4 +1,4 @@
-const mysqlManager = require("./mysql/mysql");
+const mysqlManager = require("../mysql/mysql");
 const path = require("path");
 const queryPathList = path.join(__dirname, "mybatis");
 

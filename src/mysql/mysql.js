@@ -1,33 +1,72 @@
-const fs = require("fs");
-const mybatisMapper = require("mybatis-mapper");
 const mysql = require("mysql");
-const { res } = require("express");
-// const winston = require("winston");
+const config = require("config");
+const fs = require("fs");
+const path = require("path");
+const mybatisMapper = require("mybatis-mapper");
+const queryDirPath = path.join(__dirname, "../mybatis");
 
-class mysqlManager {
-  // logger = winston.Logger;
+class MysqlManager {
+  // async init(queryPathList) {
+  //   const connection = mysql.createConnection({
+  //     host: "127.0.0.1",
+  //     user: "simplatform",
+  //     database: "iot_cloud",
+  //     password: "Simplatform!@3",
+  //   });
 
-  async init(queryPathList) {
-    const connection = mysql.createConnection({
-      host: "127.0.0.1",
-      user: "simplatform",
-      database: "iot_cloud",
-      password: "Simplatform!@3",
-    });
+  //   if (queryPathList != "") {
+  //     let files = fs.readdirSync(queryPathList);
 
-    if (queryPathList != "") {
-      let files = fs.readdirSync(queryPathList);
+  //     const results = [];
 
-      const results = [];
+  //     files.map(file => {
+  //       results.push(`${queryPathList}/${file}`);
+  //     });
 
-      files.map(file => {
-        results.push(`${queryPathList}/${file}`);
-      });
+  //     mybatisMapper.createMapper(results);
+  //   }
 
-      mybatisMapper.createMapper(results);
+  //   return connection;
+  // }
+
+  constructor() {
+    this.pool = null;
+  }
+
+  async init() {
+    this.pool = mysql.createPool(config.get("mysql"));
+
+    const connection = await this.getConnection();
+
+    connection.release();
+
+    // logger.debug(
+    //   `mysql host=${config.get("mysql.host")} database=${config.get(
+    //     "mysql.database"
+    //   )}`
+    // );
+    console.log(
+      `mysql host=${config.get("mysql.host")} database=${config.get(
+        "mysql.database"
+      )}`
+    );
+    console.log("mysql connection success!");
+    mybatisMapper.createMapper(
+      fs.readdirSync(queryDirPath).map(file => path.join(queryDirPath, file))
+    );
+
+    // per 1 hour
+    setInterval(this.maintainConnection.bind(this), 3600000);
+  }
+
+  async getConnection() {
+    console.log("call getConnection()");
+
+    try {
+      return await this.pool.getConnection(async conn => conn);
+    } catch (err) {
+      throw err;
     }
-
-    return connection;
   }
 
   async querySingle(queryList, queryPathList) {
@@ -56,8 +95,8 @@ class mysqlManager {
       return results;
     });
 
-    return result;
+    return result._results;
   }
 }
 
-module.exports = new mysqlManager();
+module.exports = new MysqlManager();

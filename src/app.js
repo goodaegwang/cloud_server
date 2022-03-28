@@ -1,18 +1,20 @@
 const express = require("express");
 const app = express();
 const port = 1004;
-const indexService = require("./index.service");
+const mysqlManager = require("./mysql/mysql");
 
 app.set("view engine", "ejs");
 app.use(express.static(__dirname + "/src/views"));
 
-app.get("/", async function (req, res) {
-  const devices = await indexService.getDevices();
+(async () => {
+  try {
+    await mysqlManager.init();
+  } catch (err) {
+    throw err;
+  }
+})();
 
-  res.render("index", {
-    devices,
-  });
-});
+app.use("/", require("./routes/index.routes"));
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
